@@ -23,7 +23,7 @@ app.use(passport.session()); // Use passport session
 
 // Use express-session middleware
 app.use(session({
-  secret: 'your_secret_key', // Replace with your own secret key
+  secret: secretKey, // Replace with your own secret key
   resave: false,
   saveUninitialized: true
 }));
