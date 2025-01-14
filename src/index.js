@@ -9,9 +9,6 @@ require('./auth');
 const app = express();
 
 
-const crypto = require('crypto');
-const secretKey = crypto.randomBytes(32).toString('hex');
-console.log(secretKey);
 
 
 app.use(express.urlencoded({ extended: true }));
