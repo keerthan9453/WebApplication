@@ -7,38 +7,49 @@ const passport = require('passport');
 const { accountsCollection, connectToDatabase } = require('./config');
 require('./auth');
 const app = express();
+app.use(session({secret: "cats"}));
+// app.use(passport.initialize()); // Initialize passport
+// app.use(passport.session()); // Use passport session
 
+// const crypto = require('crypto');
+// const secretKey = crypto.randomBytes(32).toString('hex');
+// console.log(secretKey);
 
-
+function isLoggedn(req, res, next) {
+  req.user ? next() : res.render('login');
+}
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(passport.initialize()); // Initialize passport
-app.use(passport.session()); // Use passport session
 
 
-// Use express-session middleware
-app.use(session({
-  secret: secretKey, // Replace with your own secret key
-  resave: false,
-  saveUninitialized: true
-}));
+
+// // Use express-session middleware
+// app.use(session({
+//   secret: secretKey, // Replace with your own secret key
+//   resave: false,
+//   saveUninitialized: true
+// }));
 
 app.set('view engine', 'ejs');
 app.use(express.static("public"));
 
 app.get('/', (req, res) => {
-    res.send('<a href="/auth/google">Login with Google</a>')
+    res.render('dashboard');
 });
-
-// app.get('/google-login', (req, res) => {
-//     res.render('google-login');
-// })
 
 app.get('/auth/google', 
   passport.authenticate('google' , {scope : ['email', 'profile']})
-)
+);
+
+app.get('/google/callback', 
+  passport.authenticate('google',{
+    successRedirect: '/homepage',
+    failureRedirect: '/login'
+  } ));
+
+
 app.get('/login', (req, res) => {
   res.render('login');
 })
@@ -46,7 +57,7 @@ app.get('/signup', (req, res) => {
     res.render('signup');
 })
 
-app.get('/homepage', (req, res) => {
+app.get('/homepage',isLoggedn, (req, res) => {
   res.render('homepage');
 })
 
@@ -68,7 +79,8 @@ app.post('/signup', async (req, res) => {
       const result = await accountsCollection.insertOne(newUser);
   
       console.log("User registered successfully:", result);
-      res.send("Signup successful!"); // Or redirect to another page
+      //res.send("Signup successful!"); // Or redirect to another page
+      res.redirect('/login');
     } catch (err) {
       console.error("Error during signup:", err);
       if (err.code === 11000) {
@@ -128,6 +140,7 @@ app.post('/login', async (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.render('dashboard');
 });
+
 const port = 5001;
 app.listen(port,() => {
     console.log(`Server running on port ${port}`);

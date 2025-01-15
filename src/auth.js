@@ -11,7 +11,7 @@ passport.use(new GoogelStrategy({
     passReqToCallback: true
   },
   function(request, accessToken, refreshToken, profile, done) {
-      return done(err, profile);
+      return done(null, profile);
   }
 ));
 
